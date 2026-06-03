@@ -4,21 +4,23 @@ import ApiError from '../../errors/apiError';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
+import config from '../../config';
 
 const login = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.login(req.body);
   const { accessToken, refreshToken } = result;
+  const isProduction = config.node_env === 'production';
 
   res.cookie('accessToken', accessToken, {
-    secure: true,
+    secure: isProduction,
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60,
   });
   res.cookie('refreshToken', refreshToken, {
-    secure: true,
+    secure: isProduction,
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 90,
   });
   sendResponse(res, {

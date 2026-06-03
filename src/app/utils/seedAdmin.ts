@@ -1,5 +1,5 @@
 import { UserRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import config from '../config';
 import { prisma } from '../prisma/prisma';
 
@@ -10,27 +10,46 @@ interface IUser {
 }
 
 export const seedAdmin = async () => {
-  const payload: IUser = {
-    name: 'Admin',
-    email: config.admin.email as string,
-    role: UserRole.ADMIN,
-  };
+  const defaultPassword = '123456';
   const hashedPassword = await bcrypt.hash(
-    config.admin.password as string,
-    config.salt_rounds as number,
+    defaultPassword,
+    config.salt_rounds || 10,
   );
 
-  const isExistUser = await prisma.user.findUnique({
-    where: {
-      email: payload.email,
+  const seedUsers: IUser[] = [
+    {
+      name: 'System Admin',
+      email: config.admin.email || 'admin@gmail.com',
+      role: UserRole.ADMIN,
     },
-  });
+    {
+      name: 'Project Manager',
+      email: 'pm@gmail.com',
+      role: UserRole.PROJECT_MANAGER,
+    },
+    {
+      name: 'Team Member',
+      email: 'member@gmail.com',
+      role: UserRole.TEAM_MEMBER,
+    },
+  ];
 
-  if (isExistUser) return;
+  for (const user of seedUsers) {
+    const isExistUser = await prisma.user.findUnique({
+      where: {
+        email: user.email,
+      },
+    });
 
-  const result = await prisma.user.create({
-    data: { ...payload, password: hashedPassword },
-  });
-
-  console.log(result);
+    if (!isExistUser) {
+      const result = await prisma.user.create({
+        data: {
+          ...user,
+          password: hashedPassword,
+          profilePicture: 'https://i.ibb.co.com/q2gwGfV/356306451-54b19ada-d53e-4ee9-8882-9dfed1bf1396.jpg',
+        },
+      });
+      console.log(`Seeded default ${user.role} user:`, result.email);
+    }
+  }
 };

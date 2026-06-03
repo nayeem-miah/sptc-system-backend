@@ -5,7 +5,7 @@ const createUserValidationSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 
-  role: z.enum(['USER', 'ADMIN']).default('USER'),
+  role: z.enum(['ADMIN', 'PROJECT_MANAGER', 'TEAM_MEMBER']).default('TEAM_MEMBER'),
 });
 
 const updateUserValidationSchema = z
@@ -21,7 +21,14 @@ const updateUserValidationSchema = z
     path: ['oldPassword'],
   });
 
+const changeRoleValidationSchema = z.object({
+  role: z.enum(['ADMIN', 'PROJECT_MANAGER', 'TEAM_MEMBER'], {
+    message: 'Role must be ADMIN, PROJECT_MANAGER, or TEAM_MEMBER',
+  }),
+});
+
 export const userValidation = {
   createUserValidationSchema,
   updateUserValidationSchema,
+  changeRoleValidationSchema,
 };

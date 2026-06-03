@@ -8,8 +8,11 @@ const auth = (...roles: string[]) => {
     return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
         try {
             let user;
+            let token = req.cookies.accessToken || req.headers.authorization;
 
-            const token = req.cookies.accessToken || req.headers.authorization;
+            if (token && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
 
             if (token) {
                 const secret = process.env.JWT_ACCESS_SECRET as string;

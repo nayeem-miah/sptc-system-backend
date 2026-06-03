@@ -32,7 +32,7 @@ const createUser = async (req: Request) => {
       name: req.body.name,
       email: req.body.email,
       password: hashPassword,
-      role: req.body.role ?? UserRole.USER,
+      role: req.body.role ?? UserRole.TEAM_MEMBER,
       profilePicture: "https://i.ibb.co.com/q2gwGfV/356306451-54b19ada-d53e-4ee9-8882-9dfed1bf1396.jpg",
     }
   })
@@ -42,27 +42,28 @@ const createUser = async (req: Request) => {
 
 
 const findUserById = async (id: string) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        profilePicture: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
-    if (!user) {
-      throw new ApiError(404, "User not found");
-    }
-
-    return user;
-  } catch (error) {
-    throw new ApiError(500, `Error finding user: ${error}`);
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    throw new ApiError(400, "Invalid user ID format");
   }
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      profilePicture: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return user;
 };
 
 
@@ -115,7 +116,7 @@ const userUpdateProfile = async (userId: string, payload: any) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new ApiError(404, "User not found");
   }
 
   const updateData: any = {};
@@ -129,13 +130,13 @@ const userUpdateProfile = async (userId: string, payload: any) => {
   if (oldPassword && newPassword) {
 
     if (!user.password) {
-      throw new Error("Password not set for this user");
+      throw new ApiError(400, "Password not set for this user");
     }
 
     const isMatch = await bcrypt.compare(oldPassword, user.password);
 
     if (!isMatch) {
-      throw new Error("Old password is incorrect");
+      throw new ApiError(400, "Old password is incorrect");
     }
 
     updateData.password = await bcrypt.hash(newPassword, 10);
@@ -151,6 +152,9 @@ const userUpdateProfile = async (userId: string, payload: any) => {
 };
 
 const deleteUser = async (userId: string) => {
+  if (!/^[0-9a-fA-F]{24}$/.test(userId)) {
+    throw new ApiError(400, "Invalid user ID format");
+  }
   return prisma.user.delete({
     where: { id: userId },
   });
@@ -158,11 +162,35 @@ const deleteUser = async (userId: string) => {
 
 
 
+const changeUserRole = async (id: string, payload: { role: UserRole }) => {
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    throw new ApiError(400, "Invalid user ID format");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const result = await prisma.user.update({
+    where: { id },
+    data: {
+      role: payload.role,
+    },
+  });
+
+  return result;
+};
+
 export const UserService = {
   createUser,
   getAllUsers,
   findUserById,
   getSingleUser,
   userUpdateProfile,
-  deleteUser
+  deleteUser,
+  changeUserRole,
 };

@@ -12,18 +12,17 @@ router.post(
     "/",
     validateRequest(userValidation.createUserValidationSchema),
     UserController.createUser
-
 );
 
 router.patch(
     "/update-profile",
-    auth(UserRole.USER, UserRole.ADMIN),
+    auth(UserRole.TEAM_MEMBER, UserRole.PROJECT_MANAGER, UserRole.ADMIN),
     validateRequest(userValidation.updateUserValidationSchema),
     UserController.userUpdateProfile
 );
 
 // Get current user (protected)
-router.get("/me", auth(UserRole.USER, UserRole.ADMIN), UserController.getSingleUser);
+router.get("/me", auth(UserRole.TEAM_MEMBER, UserRole.PROJECT_MANAGER, UserRole.ADMIN), UserController.getSingleUser);
 
 // FIND USER BY ID (protected)
 router.get("/:id", auth(UserRole.ADMIN), UserController.getFindUserById);
@@ -34,7 +33,12 @@ router.get("/", auth(UserRole.ADMIN), UserController.getAllUsers);
 // DELETE USER BY ID (protected)
 router.delete("/:id", auth(UserRole.ADMIN), UserController.deleteUser);
 
-
-
+// Change user role (Admin only)
+router.patch(
+    "/role/:id",
+    auth(UserRole.ADMIN),
+    validateRequest(userValidation.changeRoleValidationSchema),
+    UserController.changeUserRole
+);
 
 export const UserRoutes = router;

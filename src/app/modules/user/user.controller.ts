@@ -40,17 +40,14 @@ const getSingleUser = catchAsync(async (req: Request & { user?: any }, res: Resp
     });
 });
 
-const getFindUserById = catchAsync(async (req: Request & { user?: any }, res: Response) => {
-
-    const decodedUser = req.user as any;
-
-    const user = await UserService.findUserById(decodedUser.userId);
-
+const getFindUserById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const user = await UserService.findUserById(id);
 
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Current user retrieved successfully",
+        message: "User retrieved successfully",
         data: user
     });
 });
@@ -85,12 +82,24 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
 
 
 
+const changeUserRole = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await UserService.changeUserRole(id, req.body);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "User role updated successfully",
+        data: result
+    });
+});
+
 export const UserController = {
     createUser,
     getAllUsers,
     getSingleUser,
     getFindUserById,
     userUpdateProfile,
-    deleteUser
-
+    deleteUser,
+    changeUserRole
 };

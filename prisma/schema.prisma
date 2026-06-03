@@ -9,7 +9,8 @@ datasource db {
 
 enum UserRole {
   ADMIN
-  USER
+  PROJECT_MANAGER
+  TEAM_MEMBER
 }
 
 enum UserStatus {
@@ -23,7 +24,7 @@ model User {
   name           String
   password       String?
   email          String     @unique
-  role           UserRole   @default(USER)
+  role           UserRole   @default(TEAM_MEMBER)
   status         UserStatus @default(ACTIVE)
   Phone          String?
   profilePicture String?

@@ -1,14 +1,34 @@
+import express from 'express';
+import validateRequest from '../../middlewares/validateRequest';
+import { AuthController } from './auth.controller';
+import { authValidation } from './auth.validation';
 
-import express from 'express'
-import { AuthController } from './auth.controller'
-const router = express.Router()
+const router = express.Router();
 
-router.post("/login", AuthController.login)
-router.post("/logout", AuthController.logout)
-router.post("/forgot-password", AuthController.forgotPassword);
-router.post("/reset-password", AuthController.resetPassword);
+router.post(
+  '/login',
+  validateRequest(authValidation.loginValidationSchema),
+  AuthController.login,
+);
 
+router.post('/logout', AuthController.logout);
 
+router.post(
+  '/forgot-password',
+  validateRequest(authValidation.forgotPasswordValidationSchema),
+  AuthController.forgotPassword,
+);
 
+router.post(
+  '/forget-password',
+  validateRequest(authValidation.forgotPasswordValidationSchema),
+  AuthController.forgotPassword,
+);
 
-export const AuthRoutes = router
+router.post(
+  '/reset-password',
+  validateRequest(authValidation.resetPasswordValidationSchema),
+  AuthController.resetPassword,
+);
+
+export const AuthRoutes = router;
