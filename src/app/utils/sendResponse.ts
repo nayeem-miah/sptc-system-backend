@@ -6,8 +6,8 @@ type TResponse = {
     statusCode: number;
     success: boolean;
     message: string;
-    data?: any;
     meta?: any;
+    data?: any;
 
 };
 
@@ -16,8 +16,8 @@ const sendResponse = (res: Response, payload: TResponse) => {
         statusCode: payload.statusCode,
         success: payload.success,
         message: payload.message,
+        meta: payload.meta,
         data: payload.data,
-        meta: payload.meta
     });
 };
 
