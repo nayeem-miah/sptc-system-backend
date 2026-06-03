@@ -31,7 +31,7 @@ app.get("/", (req: Request, res: Response) => {
     res.status(200).json({
         success: true,
         statusCode: 200,
-        message: "Welcome to MedSupply API",
+        message: "Welcome to sptc-system-backend API",
     });
 });
 
