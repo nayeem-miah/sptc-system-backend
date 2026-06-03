@@ -1,35 +1,9 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  ADMIN
-  PROJECT_MANAGER
-  TEAM_MEMBER
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-}
-
-model User {
-  id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  password       String?
-  email          String     @unique
-  role           UserRole   @default(TEAM_MEMBER)
-  status         UserStatus @default(ACTIVE)
-  Phone          String?
-  profilePicture String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  @@map("users")
 }
